@@ -1,0 +1,4 @@
+This is a file
+This is the second line of the same file
+This is a number with a format: 3.1418
+3.1418
