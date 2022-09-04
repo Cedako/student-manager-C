@@ -33,6 +33,17 @@ int main(){
     read_record(record_manager);
     fclose(record_manager);
 
+    float numero = 3.14;
+    record_manager = fopen("../record.txt", "a+");
+    char mensaje[100] = "Hola mundo!\n";
+    
+    fputc('G', record_manager);
+    fputc('o', record_manager);
+    fputc('l', record_manager);
+    fputc('\n', record_manager);
+    fputs(mensaje, record_manager);
+    fprintf(record_manager,"Esto es un numero con formato %3.3f\n%3.3f\n",numero,numero);
+    fclose(record_manager);
 
     system("pause");
     return 0;
