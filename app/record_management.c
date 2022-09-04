@@ -2,15 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-int main(){
-    //Crea un puntero para almacenar un archivo.
-    FILE *record_manager;
+void read_record(FILE *record){
     float numero = 0.0;
     char buffer[100] = "";
     char letra;
     int i;
+    for(i = 0; i<4;i++){
+    letra = fgetc(record);
+    printf("%c",letra);
+    }
+    fgets(buffer,100,record);
+    printf("%s\n",buffer);//segunda linea del documento
+    fgets(buffer,100,record);
+    printf("%s\n",buffer);//tercera linea del documento
+    fscanf(record, "%f", &numero);
+    printf("%f\n",numero);//lee el vaor numerico y lo guarda en un float
+}
 
+int main(){
+    //Crea un puntero para almacenar un archivo.
+    FILE *record_manager;
+    
     /*Rellena el puntero con el archivo, abre el archvo con fopen(), proporciona una direccion
      y una operacion, en este caso "r" indica leer el archivo.*/
     record_manager = fopen("../record.txt","r");
@@ -18,20 +30,10 @@ int main(){
         printf("Archivo no encontrado\n");
         return -1;
     }
-    for(i = 0; i<6;i++){
-    letra = fgetc(record_manager);
-    }
-    rewind(record_manager);
-    fgets(buffer,100,record_manager);
-    fgets(buffer,100,record_manager);
-    fscanf(record_manager, "%f", &numero);
-
-    
-    printf("%c\n",letra);
-    printf("%s\n",buffer);
-    printf("%s\n",buffer);
-    printf("%f\n",numero);
+    read_record(record_manager);
     fclose(record_manager);
+
+
     system("pause");
     return 0;
 }
@@ -61,3 +63,7 @@ int main(){
     //fprintf() funciona de la misma forma que printf() pero su primer parámetro es la variable de archivo.
     //fputc() escribe un carácter en el archivo, recibe dos parámetros, el carácter a escribir y la variable de archivo.
     //fputs() escribe una cadena en el archivo, recibe dos parámetros, la cadena a escribir, y la variable de archivo.
+
+    //fputc() escribe un carácter en el archivo, recibe dos parámetros, el carácter a escribir y la variable de archivo.
+    //fputs() escribe una cadena en el archivo, recibe dos parámetros, la cadena a escribir, y la variable de archivo.
+    //fprintf() funciona de la misma forma que printf() pero su primer parámetro es la variable de archivo.
