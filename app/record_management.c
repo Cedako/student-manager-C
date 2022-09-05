@@ -1,59 +1,62 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void write_record(FILE *record){
-    record = fopen("../record.txt", "a+");
+#include <math.h>
+
+struct record{
+    char name[20];
+    short record;
+};
+
+void write_record(FILE *record, struct record u){
+    record = fopen("../record.txt", "wb");
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
-
-    char mensaje[100] = "Hola mundo!\n";
-    float numero = 3.14;
-    fputc('G', record);
-    fputc('o', record);
-    fputc('l', record);
-    fputc('\n', record);
-    fputs(mensaje, record);
-    fprintf(record,"Esto es un numero con formato %3.3f\n%3.3f\n",numero,numero);
+    char name[20]; int rec;
+    printf("Enter the name: ");
+    scanf(" %s", &name);
+    strcpy(u.name,name);
+    printf("Enter the record: ");
+    scanf(" %d", &rec);
+    u.record = rec;
+    fwrite(&u, sizeof(struct record), 1, record);
+    printf("Done\n");
     fclose(record);
 }
 
-void read_record(FILE *record){
-    record = fopen("../record.txt","r");
+void search_record(FILE *record, struct record u){
+    record = fopen("../record.txt","rb");
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
 
-    float numero = 0.0;
-    char buffer[100] = "";
-    char letra;
-    int i;
-    for(i = 0; i<4;i++){
-    letra = fgetc(record);
-    printf("%c",letra);
-    }
-    fgets(buffer,100,record);
-    printf("%s\n",buffer);//segunda linea del documento
-    fgets(buffer,100,record);
-    printf("%s\n",buffer);//tercera linea del documento
-    fscanf(record, "%f", &numero);
-    printf("%f\n",numero);//lee el vaor numerico y lo guarda en un float
+    fread(&u, sizeof(struct record), 1, record);
+    printf("Name is: %s\nAge is: %d\nDone\n", u.name,u.record);
     fclose(record);
 }
 
 int main(){
+    struct record usuario;
     //Crea un puntero para almacenar un archivo.
     FILE *record_manager;
-    char operation;
-    printf("Welcome to the student grade system\nWhat will you do? ");
-    scanf(" %c",&operation);
-    if(operation=='r'){
-        read_record(record_manager);
-    } else if (operation=='a'){
-        write_record(record_manager);
-    } else {
-        printf("error\n");
+    int operation;
+    printf("Welcome to the student grade system\nWhat will you do?\n");
+    printf("0 - Nothing\n1 - Search\n2 - Add\n3 - Remove\n4 - Edit\n");
+    while (operation!=0){
+        printf("Operation => ");
+        scanf(" %d",&operation);
+        if(operation==1){
+            search_record(record_manager, usuario);
+        } else if (operation==2){
+            write_record(record_manager, usuario);
+        } else if (operation==0) {
+            printf("exiting...\n");
+        } else {
+            printf("error");
+        }
     }
+    
 
     system("pause");
     return 0;
