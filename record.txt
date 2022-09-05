@@ -1,20 +1,4 @@
 Gol
-This is the second line of the same file
-This is a number with a format: 3.1418
-3.1418
-Gol
-Gol
-Gol
-Hola mundo!
-Gol
-Hola mundo!
-Gol
-Hola mundo!
-
-Esto es un numero con formato 3.140000
-Gol
-Hola mundo!
-Gol
 Hola mundo!
 Esto es un numero con formato 3.140
 3.140
