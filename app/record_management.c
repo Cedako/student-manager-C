@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 void write_record(FILE *record){
+    record = fopen("../record.txt", "a+");
+    if(record == NULL){
+        printf("Archivo no encontrado\n");
+    }
+
     char mensaje[100] = "Hola mundo!\n";
     float numero = 3.14;
     fputc('G', record);
@@ -10,9 +15,15 @@ void write_record(FILE *record){
     fputc('\n', record);
     fputs(mensaje, record);
     fprintf(record,"Esto es un numero con formato %3.3f\n%3.3f\n",numero,numero);
+    fclose(record);
 }
 
 void read_record(FILE *record){
+    record = fopen("../record.txt","r");
+    if(record == NULL){
+        printf("Archivo no encontrado\n");
+    }
+
     float numero = 0.0;
     char buffer[100] = "";
     char letra;
@@ -27,29 +38,35 @@ void read_record(FILE *record){
     printf("%s\n",buffer);//tercera linea del documento
     fscanf(record, "%f", &numero);
     printf("%f\n",numero);//lee el vaor numerico y lo guarda en un float
+    fclose(record);
 }
 
 int main(){
     //Crea un puntero para almacenar un archivo.
     FILE *record_manager;
-    
-    /*Rellena el puntero con el archivo, abre el archvo con fopen(), proporciona una direccion
-     y una operacion, en este caso "r" indica leer el archivo.*/
-    record_manager = fopen("../record.txt","r");
-    if(record_manager == NULL){
-        printf("Archivo no encontrado\n");
-        return -1;
+    char operation;
+    printf("Welcome to the student grade system\nWhat will you do? ");
+    scanf(" %c",&operation);
+    if(operation=='r'){
+        read_record(record_manager);
+    } else if (operation=='a'){
+        write_record(record_manager);
+    } else {
+        printf("error\n");
     }
-    read_record(record_manager);
-    fclose(record_manager);
-    
-    record_manager = fopen("../record.txt", "a+");
-    write_record(record_manager);
-    fclose(record_manager);
-    
+
     system("pause");
     return 0;
 }
+/*
+r — abre el archivo en modo de solo lectura.
+w — abre el archivo para escritura (si no existe lo crea, si existe lo destruye).
+a — abre el archivo para agregar información (si no existe lo crea).
+r+ — abre el archivo para lectura/escritura (comienza al principio del archivo).
+w+ — abre el archivo para lectura/escritura, sobre-escribe el archivo si este ya existe o lo crea si no).
+a+ — abre el archivo para lectura/escritura (se sitúa al final del archivo).
+Si vamos a trabajar con archivos binarios usamos la letra b así que los modos de acceso quedan “rb”, “wb”, “ab”, “rb+”, “wb+”, “ab+”.
+*/
 
 //Rebobina el cursor del archivo, lo devuelve al inicio.
     //rewind(record_manager);
