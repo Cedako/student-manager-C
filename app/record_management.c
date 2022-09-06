@@ -9,7 +9,7 @@ struct record{
 };
 
 void write_record(FILE *record, struct record u){
-    record = fopen("../record.txt", "wb");
+    record = fopen("../record.txt", "ab+");
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
@@ -30,9 +30,14 @@ void search_record(FILE *record, struct record u){
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
-
+    
     fread(&u, sizeof(struct record), 1, record);
-    printf("Name is: %s\nAge is: %d\nDone\n", u.name,u.record);
+    while (!feof(record)){
+        printf("Name is: %s\nAge is: %d\n", u.name,u.record);
+        fread(&u, sizeof(struct record), 1, record);
+    }
+    printf("Done\n");
+    
     fclose(record);
 }
 
