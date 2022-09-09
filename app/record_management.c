@@ -38,32 +38,54 @@ void search_record(FILE *record, struct record u){
         printf("Archivo no encontrado\n");
     }
 
-    int type;
+    int type;short record_s;char name_s[20];
 
     while (type != 0)
     {
+        system("cls");
+        rewind(record);
         printf("Search...\n(1)By name\n(2)By record\n(3)Retrieve all\n(0)Go to main menu\n");
         printf("Type of search => "); scanf(" %d",&type);
+
         switch (type)
         {
         case 1: //Search by name
-            /* code */
+            printf("Enter the name: "); scanf(" %s", &name_s);
+            while (fread(&u, sizeof(struct record), 1, record)){
+                if(strcmp(name_s,u.name) == 0){
+                    printf("Name is: %s\nAge is: %d\n", u.name,u.record);
+                    printf("-------------------------\n");
+                }
+            }
+            printf("Done\n");
+            system("pause");
             break;
         case 2: //Search by record
-            /* code */
+            printf("Enter the record: "); scanf(" %d", &record_s);
+            while (fread(&u, sizeof(struct record), 1, record)){
+                if(u.record==record_s){
+                    printf("Name is: %s\nAge is: %d\n", u.name,u.record);
+                    printf("-------------------------\n");
+                }
+            }
+            type = 2;/*For some reason, type becomes 0 when in case 2, idk why, but this is the temporary fix*/
+            printf("Done\n");
+            system("pause");
             break;
         case 3: //Retrieve all
             //prints records until reaching the end of the file (EOF)
             while (fread(&u, sizeof(struct record), 1, record)){
                 printf("Name is: %s\nAge is: %d\n", u.name,u.record);
+                printf("-------------------------\n");
             }
             printf("Done\n");
+            system("pause");
             break;
         case 0: //Exit search
             printf("Exiting to main menu...\n");
             break;
         default:
-        printf("Error");
+            printf("Error\n");
             break;
         }
     }
@@ -77,14 +99,15 @@ int main(){
     FILE *record_manager;
     int operation; //Stores the user operation
     printf("Welcome to the student grade system\nWhat will you do?\n");
-    printf("0 - Nothing\n1 - Search\n2 - Add\n3 - Remove\n4 - Edit\n");
+    
 
     //Asks the user what to do
     while (operation!=0){
+        system("cls");
+        printf("0 - Close system\n1 - Search\n2 - Add\n3 - Remove\n4 - Edit\n");
         printf("Operation => ");
         scanf(" %d",&operation);
         if(operation==1){
-            system("cls");
             search_record(record_manager, usuario); //searching
         } else if (operation==2){
             system("cls");
