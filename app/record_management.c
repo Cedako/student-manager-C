@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <conio.h>
 
+//struct for the record
 struct record{
     char name[20];
     short record;
@@ -13,13 +15,18 @@ void write_record(FILE *record, struct record u){
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
+    //variables for storing the inputs
     char name[20]; int rec;
+
+    //record form
     printf("Enter the name: ");
     scanf(" %s", &name);
-    strcpy(u.name,name);
+    strcpy(u.name,name); //stores variable inside the struct
     printf("Enter the record: ");
     scanf(" %d", &rec);
-    u.record = rec;
+    u.record = rec; //stores variable inside the struct
+
+    //stores the struct in the binary file
     fwrite(&u, sizeof(struct record), 1, record);
     printf("Done\n");
     fclose(record);
@@ -30,35 +37,69 @@ void search_record(FILE *record, struct record u){
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
-    
-    fread(&u, sizeof(struct record), 1, record);
-    while (!feof(record)){
-        printf("Name is: %s\nAge is: %d\n", u.name,u.record);
-        fread(&u, sizeof(struct record), 1, record);
+
+    int type;
+
+    while (type != 0)
+    {
+        printf("Search...\n(1)By name\n(2)By record\n(3)Retrieve all\n(0)Go to main menu\n");
+        printf("Type of search => "); scanf(" %d",&type);
+        switch (type)
+        {
+        case 1: //Search by name
+            /* code */
+            break;
+        case 2: //Search by record
+            /* code */
+            break;
+        case 3: //Retrieve all
+            //prints records until reaching the end of the file (EOF)
+            while (fread(&u, sizeof(struct record), 1, record)){
+                printf("Name is: %s\nAge is: %d\n", u.name,u.record);
+            }
+            printf("Done\n");
+            break;
+        case 0: //Exit search
+            printf("Exiting to main menu...\n");
+            break;
+        default:
+        printf("Error");
+            break;
+        }
     }
-    printf("Done\n");
-    
     fclose(record);
+    
 }
 
 int main(){
     struct record usuario;
-    //Crea un puntero para almacenar un archivo.
+    //Creates pointer to store the file
     FILE *record_manager;
-    int operation;
+    int operation; //Stores the user operation
     printf("Welcome to the student grade system\nWhat will you do?\n");
     printf("0 - Nothing\n1 - Search\n2 - Add\n3 - Remove\n4 - Edit\n");
+
+    //Asks the user what to do
     while (operation!=0){
         printf("Operation => ");
         scanf(" %d",&operation);
         if(operation==1){
-            search_record(record_manager, usuario);
+            system("cls");
+            search_record(record_manager, usuario); //searching
         } else if (operation==2){
-            write_record(record_manager, usuario);
+            system("cls");
+            write_record(record_manager, usuario); //adding
+        } else if (operation==3){
+            system("cls");
+            write_record(record_manager, usuario); //removing
+        } else if (operation==4){
+            system("cls");
+            write_record(record_manager, usuario); //editing
         } else if (operation==0) {
-            printf("exiting...\n");
+            system("cls");
+            printf("Exiting...\n"); //exiting the system and closing the program
         } else {
-            printf("error");
+            printf("error"); //error if operation does not exist
         }
     }
     
