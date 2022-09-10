@@ -8,10 +8,11 @@
 struct record{
     char name[20];
     short record;
+    int deleted;
 };
 
 void write_record(FILE *record, struct record u){
-    record = fopen("../record.txt", "ab+");
+    record = fopen("../record.bin", "ab+");
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
@@ -25,20 +26,77 @@ void write_record(FILE *record, struct record u){
     printf("Enter the record: ");
     scanf(" %d", &rec);
     u.record = rec; //stores variable inside the struct
+    u.deleted = 0;
 
     //stores the struct in the binary file
+    printf("%d\n",ftell(record));
     fwrite(&u, sizeof(struct record), 1, record);
+    printf("%d\n",ftell(record));
     printf("Done\n");
+    system("pause");
     fclose(record);
 }
 
+void delete_record(FILE *record, struct record u,char name_s[20],short record_s){
+    rewind(record);
+    if(name_s!="nothing"){
+       while (fread(&u, sizeof(struct record), 1, record)){
+            if(strcmp(name_s,u.name) == 0 && !u.deleted){
+                struct record t;
+                strcpy(t.name,u.name);
+                t.record = u.record;
+                t.deleted = 1;
+                printf("Name is: %s\nAge is: %d\nStatus: %d\n", t.name,t.record,t.deleted);
+                printf("%d\n",ftell(record));
+                fseek(record, -(long)sizeof(t), SEEK_CUR);
+                printf("%d\n",ftell(record));
+                fwrite(&t, sizeof(t), 1, record); //Problem: file is not overwritten, therefore, it doesn't change.
+                printf("%d\n",ftell(record));
+                fread(&u, sizeof(struct record), 1, record);
+                printf("%d\n",ftell(record));
+                printf("Name is: %s\nAge is: %d\nStatus: %d\n", u.name,u.record,u.deleted);
+                break;
+            }
+        }
+    } else if (record_s){
+        while (fread(&u, sizeof(struct record), 1, record)){
+            if(u.record==record_s && !u.deleted){
+                u.deleted = 1;
+                printf("%d has been deleted\n",record_s);
+            }
+        }
+    }
+    
+    printf("record removed succesfully\n");
+    
+}
+
+void wipe_file(FILE *record, struct record u){
+    FILE* temp;
+    char newname[] = "../record.bin";
+    char oldname[] = "../temp.bin";
+    record = fopen("../record.bin","rb");
+    rewind(record);
+    temp = fopen("../temp.bin","wb");
+
+    while (fread(&u, sizeof(struct record), 1, record)){
+        if(!u.deleted){
+            fwrite(&u, sizeof(struct record), 1, temp);
+        }
+    }
+    printf("Succesfully removed\n");
+    fclose(temp);
+    rename(oldname, newname);
+    remove(oldname);
+}
+
 void search_record(FILE *record, struct record u){
-    record = fopen("../record.txt","rb");
+    record = fopen("../record.bin","rb");
     if(record == NULL){
         printf("Archivo no encontrado\n");
     }
 
-    int type;short record_s;char name_s[20];
+    int type,found=0;short record_s;char name_s[20];
 
     while (type != 0)
     {
@@ -50,20 +108,49 @@ void search_record(FILE *record, struct record u){
         switch (type)
         {
         case 1: //Search by name
+            system("cls");
+            printf("Search\n");
             printf("Enter the name: "); scanf(" %s", &name_s);
             while (fread(&u, sizeof(struct record), 1, record)){
-                if(strcmp(name_s,u.name) == 0){
-                    printf("Name is: %s\nAge is: %d\n", u.name,u.record);
+                if(strcmp(name_s,u.name) == 0 ){
+                    printf("Name is: %s\nAge is: %d\nStatus: %d\n", u.name,u.record,u.deleted);
                     printf("-------------------------\n");
+                    found+=1;
                 }
             }
-            printf("Done\n");
+            if (found == 0)
+            {
+                printf("No coincidences\n");
+            } else {
+                printf("%d Coincidences\n",found);
+                printf("What do you want to do?\n"); int option;
+                printf("(1) Edit record\n(2) Delete record\n(0) Back to search menu\nOperation => ");
+                scanf(" %d",&option);
+                switch (option)
+                {
+                case 1:
+                    printf("not aviable yet\n");
+                    break;
+                case 2:
+                    system("cls");
+                    delete_record(record,u,name_s,0);
+                    break;
+                case 0:
+                    printf("Exiting to search menu...\n");
+                    break;
+                default:
+                    printf("Error, invalid input");
+                    break;
+                }
+            }
+            
+            
             system("pause");
             break;
         case 2: //Search by record
             printf("Enter the record: "); scanf(" %d", &record_s);
             while (fread(&u, sizeof(struct record), 1, record)){
-                if(u.record==record_s){
+                if(u.record==record_s && !u.deleted){
                     printf("Name is: %s\nAge is: %d\n", u.name,u.record);
                     printf("-------------------------\n");
                 }
@@ -75,8 +162,10 @@ void search_record(FILE *record, struct record u){
         case 3: //Retrieve all
             //prints records until reaching the end of the file (EOF)
             while (fread(&u, sizeof(struct record), 1, record)){
-                printf("Name is: %s\nAge is: %d\n", u.name,u.record);
-                printf("-------------------------\n");
+                if(!u.deleted){
+                    printf("Name is: %s\nAge is: %d\nStatus is: %d\n", u.name,u.record,u.deleted);
+                    printf("-------------------------\n");
+                }
             }
             printf("Done\n");
             system("pause");
@@ -93,6 +182,8 @@ void search_record(FILE *record, struct record u){
     
 }
 
+
+
 int main(){
     struct record usuario;
     //Creates pointer to store the file
@@ -104,7 +195,7 @@ int main(){
     //Asks the user what to do
     while (operation!=0){
         system("cls");
-        printf("0 - Close system\n1 - Search\n2 - Add\n3 - Remove\n4 - Edit\n");
+        printf("0 - Close system\n1 - Search\n2 - Add\n");
         printf("Operation => ");
         scanf(" %d",&operation);
         if(operation==1){
@@ -112,12 +203,6 @@ int main(){
         } else if (operation==2){
             system("cls");
             write_record(record_manager, usuario); //adding
-        } else if (operation==3){
-            system("cls");
-            write_record(record_manager, usuario); //removing
-        } else if (operation==4){
-            system("cls");
-            write_record(record_manager, usuario); //editing
         } else if (operation==0) {
             system("cls");
             printf("Exiting...\n"); //exiting the system and closing the program
