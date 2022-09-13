@@ -7,7 +7,7 @@
 //struct for the record
 struct record{
     char name[20];
-    short record;
+    short id;
     int deleted;
 };
 
@@ -17,36 +17,54 @@ void write_record(FILE *record, struct record u){
         printf("Archivo no encontrado\n");
     }
     //variables for storing the inputs
-    char name[20]; int rec;
-
+    char name[20]; int id,count=1;
+    struct record b;
     //record form
-    printf("Enter the name: ");
-    scanf(" %s", &name); //Error, only can enter 1 name
-    strcpy(u.name,name); //stores variable inside the struct
-    printf("Enter the record: ");
-    scanf(" %d", &rec);
-    u.record = rec; //stores variable inside the struct
-    u.deleted = 0;
+    while (count!=0){
+        printf("Enter the name (no spaces): ");
+        scanf(" %s", &name); //Error, only can enter 1 name
+        //finds coincidences, if there are matches, asks for the name again
+        while(fread(&b, sizeof(struct record), 1, record)){
+            if(strcmp(name,b.name) == 0){
+                system("cls");
+                printf("%s already exists\n",name);
+                count = 2;
+                break;
+            }
+        }
+        count = count == 2 ? 1 : 0;
+    }
+    
+    //stores variable inside the struct
+    strcpy(u.name,name); 
 
+    //Generate the IDs, dont ask the user
+    if(b.id>0){
+        u.id = b.id+1; //adds 1 to id
+    } else {
+        u.id = 1; //first id
+    }
+
+    //deleted is 0, meaning that is not deleted
+    u.deleted = 0;
     //stores the struct in the binary file
-    printf("%d\n",ftell(record));
     fwrite(&u, sizeof(struct record), 1, record);
-    printf("%d\n",ftell(record));
     printf("Done\n");
+    system("pause");
     fclose(record);
 }
 
-void delete_record(FILE *record, struct record u,char name_s[20],short record_s){
+void delete_record(FILE *record, struct record u,char name_s[20],short id_s){
     rewind(record);
     if(name_s!="nothing"){
        while (fread(&u, sizeof(struct record), 1, record)){
             if(strcmp(name_s,u.name) == 0 && !u.deleted){
                 struct record t;
                 strcpy(t.name,u.name);
-                t.record = u.record;
+                t.id = u.id;
                 t.deleted = 1;
                 //prints the new record, which copies the one to be deleted and changes .deleted to 1
-                printf("Name is: %s\nAge is: %d\nStatus: %d\n", t.name,t.record,t.deleted);
+                printf("Name is: %s\nID is: %d\nStatus: %d\n", t.name,t.id,t.deleted);
                 //prints current position inside the file
                 printf("%d\n",ftell(record));
                 //rolls back to the start of the deleted record
@@ -64,21 +82,21 @@ void delete_record(FILE *record, struct record u,char name_s[20],short record_s)
                 //prints current position inside the file
                 printf("%d\n",ftell(record));
                 //prints the name, record and status of the deleted file, if status is one, file will not appear in search
-                printf("Name is: %s\nAge is: %d\nStatus: %d\n", u.name,u.record,u.deleted);
+                printf("Name is: %s\nID is: %d\nStatus: %d\n", u.name,u.id,u.deleted);
                 printf("%s has been deleted",u.name);
                 break;
             }
         }
-    } else if (record_s){
+    } else if (id_s){
         while (fread(&u, sizeof(struct record), 1, record)){
-            if(u.record==record_s && !u.deleted){
+            if(u.id==id_s && !u.deleted){
                 struct record t;
                 strcpy(t.name,u.name);
-                t.record = u.record;
+                t.id = u.id;
                 t.deleted = 1;
                 fseek(record, -(long)sizeof(t), SEEK_CUR);
                 fwrite(&t, sizeof(t), 1, record);
-                printf("%d has been deleted\n",record_s);
+                printf("%d has been deleted\n",id_s);
                 break;
             }
         }
@@ -118,14 +136,14 @@ void search_record(FILE *record, struct record u){
         printf("Archivo no encontrado\n");
     }
 
-    int type,found;short record_s;char name_s[20];
+    int type,found;short id_s;char name_s[20];
 
     while (type != 0)
     {
         found=0;
         system("cls");
         rewind(record);
-        printf("Search...\n(1)By name\n(2)By record\n(3)Retrieve all\n(0)Go to main menu\n");
+        printf("Search...\n(1)By name\n(2)By ID\n(3)Retrieve all\n(0)Go to main menu\n");
         printf("Type of search => "); scanf(" %d",&type);
 
         switch (type)
@@ -136,9 +154,9 @@ void search_record(FILE *record, struct record u){
             printf("Enter the name: "); scanf(" %s", &name_s);
             while (fread(&u, sizeof(struct record), 1, record)){
                 if(strcmp(name_s,u.name) == 0 && !u.deleted){
-                    printf("Name is: %s\nAge is: %d\nStatus: %d\n", u.name,u.record,u.deleted);
+                    printf("Name is: %s\nID is: %d\nStatus: %d\n", u.name,u.id,u.deleted);
                     printf("-------------------------\n");
-                    found+=1;
+                    found=1;
                 }
             }
             if (found == 0)
@@ -168,13 +186,13 @@ void search_record(FILE *record, struct record u){
                 }
             }
             break;
-        case 2: //Search by record
-            printf("Enter the record: "); scanf(" %d", &record_s);
+        case 2: //Search by ID
+            printf("Enter the ID: "); scanf(" %d", &id_s);
             while (fread(&u, sizeof(struct record), 1, record)){
-                if(u.record==record_s && !u.deleted){
-                    printf("Name is: %s\nAge is: %d\n", u.name,u.record);
+                if(u.id==id_s && !u.deleted){
+                    printf("Name is: %s\nID is: %d\n", u.name,u.id);
                     printf("-------------------------\n");
-                    found+=1;
+                    found=1;
                 }
             }
             if (found == 0)
@@ -193,7 +211,7 @@ void search_record(FILE *record, struct record u){
                     break;
                 case 2:
                     system("cls");
-                    delete_record(record,u,"nothing",record_s); //Error:records that .record equals to 0 cant be deleted
+                    delete_record(record,u,"nothing",id_s); //Error:records that .record equals to 0 cant be deleted
                     break;
                 case 0:
                     printf("Exiting to search menu...\n");
@@ -209,7 +227,7 @@ void search_record(FILE *record, struct record u){
             //prints records until reaching the end of the file (EOF)
             while (fread(&u, sizeof(struct record), 1, record)){
                 if(!u.deleted){
-                    printf("Name is: %s\nAge is: %d\nStatus is: %d\n", u.name,u.record,u.deleted);
+                    printf("Name is: %s\nID is: %d\nStatus is: %d\n", u.name,u.id,u.deleted);
                     printf("-------------------------\n");
                 }
             }
@@ -245,7 +263,7 @@ int main(){
         printf("Operation => ");
         scanf(" %d",&operation);
         if(operation==1){
-            search_record(record_manager, usuario); //searching
+            search_record(record_manager, usuario); //searching, deleting and edditing
         } else if (operation==2){
             system("cls");
             write_record(record_manager, usuario); //adding
@@ -268,12 +286,12 @@ int main(){
 }
 
 /* Things to do:
-    change struct, record shall be ID
-    while adding ID's shall be all different
-    generate incremental ID's > 0 to solve the problem
+    change struct, record shall be ID - done
+    while adding ID's shall be all different - done
+    generate incremental ID's > 0 to solve the problem - done
     change struct, names shall be nicknames
-    nicknames cannot be repeated, add validations
-    since nicknames cannot be repeated, change the variable found
+    nicknames cannot be repeated, add validations - done
+    since nicknames cannot be repeated, change the variable found - done
     ---------------------------------------------
     add the edit function
     users can edit the name
