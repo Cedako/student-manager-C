@@ -106,6 +106,70 @@ void delete_record(FILE *record, struct record u,char name_s[20],short id_s){
     system("pause");
 }
 
+void edit_record(FILE *record, struct record u, char name_s[20], short id_s){
+    rewind(record);
+    struct record t;
+    char name[20]; int count; struct record b;
+    while (count!=0){
+        printf("Enter a new name (no spaces): ");
+        scanf(" %s", &name); //Error, only can enter 1 name
+        //finds coincidences, if there are matches, asks for the name again
+        while(fread(&b, sizeof(struct record), 1, record)){
+            if(strcmp(name,b.name) == 0){
+                system("cls");
+                printf("%s already exists\n",name);
+                count = 2;
+                break;
+            }
+        }
+        count = count == 2 ? 1 : 0;
+    }
+    
+    //stores variable inside the struct
+    strcpy(t.name,name);
+    t.id = u.id;
+    t.deleted = 0;
+    rewind(record);
+    if(name_s!="nothing"){
+       while (fread(&u, sizeof(struct record), 1, record)){
+            if(strcmp(name_s,u.name) == 0 && !u.deleted){
+                //prints the new record, which copies the one to be deleted and changes .deleted to 1
+                printf("Name is: %s\nID is: %d\nStatus: %d\n", t.name,t.id,t.deleted);
+                //prints current position inside the file
+                printf("%d\n",ftell(record));
+                //rolls back to the start of the deleted record
+                fseek(record, -(long)sizeof(t), SEEK_CUR);
+                //prints current position inside the file
+                printf("%d\n",ftell(record));
+                //overwrites the file, to put the new name
+                fwrite(&t, sizeof(t), 1, record);
+                //prints current position inside the file
+                printf("%d\n",ftell(record));
+                //rolls back to the start of the now deleted record
+                fseek(record, -(long)sizeof(t), SEEK_CUR);
+                //reads the deleted record
+                fread(&u, sizeof(struct record), 1, record);
+                //prints current position inside the file
+                printf("%d\n",ftell(record));
+                //prints the name, record and status of the deleted file, if status is one, file will not appear in search
+                printf("Name is: %s\nID is: %d\nStatus: %d\n", u.name,u.id,u.deleted);
+                printf("The new name is: %s\n",u.name);
+                break;
+            }
+        }
+    } else if (id_s){
+        while (fread(&u, sizeof(struct record), 1, record)){
+            if(u.id==id_s && !u.deleted){
+                fseek(record, -(long)sizeof(t), SEEK_CUR);
+                fwrite(&t, sizeof(t), 1, record);
+                printf("The new name is: %d\n",id_s);
+                break;
+            }
+        }
+    }
+    system("pause");
+}
+
 void wipe_file(FILE *record, struct record u){
     FILE* temp;
     char newname[] = "../record.bin";
@@ -171,7 +235,8 @@ void search_record(FILE *record, struct record u){
                 switch (option)
                 {
                 case 1:
-                    printf("not aviable yet\n"); //next on the list
+                    system("cls");
+                    edit_record(record,u,name_s,0);
                     break;
                 case 2:
                     system("cls");
@@ -207,7 +272,8 @@ void search_record(FILE *record, struct record u){
                 switch (option)
                 {
                 case 1:
-                    printf("not aviable yet\n"); //next on the list
+                    system("cls");
+                    edit_record(record,u,"nothing",id_s);
                     break;
                 case 2:
                     system("cls");
@@ -289,11 +355,11 @@ int main(){
     change struct, record shall be ID - done
     while adding ID's shall be all different - done
     generate incremental ID's > 0 to solve the problem - done
-    change struct, names shall be nicknames
+    change struct, names shall be nicknames or usernames
     nicknames cannot be repeated, add validations - done
     since nicknames cannot be repeated, change the variable found - done
     ---------------------------------------------
-    add the edit function
+    add the edit function - done
     users can edit the name
     ---------------------------------------------
     change terminology
